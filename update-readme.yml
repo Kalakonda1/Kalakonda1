@@ -1,0 +1,44 @@
+name: Update Profile README
+
+on:
+  schedule:
+    # Runs every 6 hours — keeps your profile fresh around the clock
+    - cron: "0 */6 * * *"
+  push:
+    branches:
+      - main
+  workflow_dispatch: # lets you trigger manually from the Actions tab
+
+jobs:
+  update-readme:
+    name: Generate dynamic README
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests python-dateutil
+
+      - name: Run README generator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ github.repository_owner }}
+          WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}   # optional
+        run: python scripts/update_readme.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || \
+            git commit -m "chore: auto-update profile README [skip ci]" && git push
