@@ -3,7 +3,7 @@ name: Update Profile README
 on:
   schedule:
     # Runs every 6 hours — keeps your profile fresh around the clock
-    - cron: "0 */6 * * *"
+    - cron: "0 */1 * * *"
   push:
     branches:
       - main
